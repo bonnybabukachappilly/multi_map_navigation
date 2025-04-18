@@ -1,0 +1,11 @@
+geometry_msgs/PoseStamped goal_position
+string target_map_name
+
+---
+
+bool success
+string message
+
+---
+
+float32 progress
