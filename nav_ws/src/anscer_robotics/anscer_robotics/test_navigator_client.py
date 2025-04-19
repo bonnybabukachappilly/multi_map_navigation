@@ -21,12 +21,12 @@ class TestClient(Node):
         # Define the goal pose
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'map'
-        goal_pose.pose.position.x = -4.0
+        goal_pose.pose.position.x = 4.0
         goal_pose.pose.position.y = 1.0
         goal_pose.pose.orientation.w = 1.0
 
         goal_msg.target_pose = goal_pose
-        goal_msg.target_map = 'map1'  # Different from default "room1"
+        goal_msg.target_map = 'map2'  # Different from default "room1"
 
         self.get_logger().info(
             f"Sending goal to map '{goal_msg.target_map}'...")
