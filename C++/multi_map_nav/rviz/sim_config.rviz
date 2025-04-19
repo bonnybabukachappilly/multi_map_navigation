@@ -1,0 +1,21 @@
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Name: Map
+      Class: rviz/Map
+      Enabled: true
+      Topic: /map
+    - Name: RobotModel
+      Class: rviz/RobotModel
+      Enabled: true
+      Robot Description: robot_description
+    - Name: Goal
+      Class: rviz/Goal
+      Enabled: true
+      Action Topic: /navigate_to_map
+      Action Type: multi_map_nav/action/NavigateToMap
+  Global Options:
+    Fixed Frame: map
+
+Tool Properties:
+  Current Tool: rviz/Goal

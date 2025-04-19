@@ -4,4 +4,4 @@ string target_map
 bool success
 string message
 ---
-string current_status
+float32 percent_complete
