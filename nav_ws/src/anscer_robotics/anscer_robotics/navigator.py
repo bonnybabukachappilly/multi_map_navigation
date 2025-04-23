@@ -5,6 +5,27 @@ from geometry_msgs.msg import PoseStamped
 
 
 class Navigator:
+    """Navigation request is handled here
+    
+    Attributes
+    ----------
+    node: Node
+        ROS node for creating all clients
+        
+    navigator: BasicNavigator
+        Nav2 Navigation
+
+    Methods
+    -------
+    go_to_pose(self, pose: PoseStamped) -> bool:
+        Navigate to the requested pose
+    """
+    
+    __slots__: list[str] = [
+        'node',
+        'navigator'
+    ]
+
     def __init__(self, node: Node) -> None:
         self.node: Node = node
         self.navigator = BasicNavigator()
@@ -12,6 +33,18 @@ class Navigator:
         self.node.get_logger().info("[Navigator] Initialized")
 
     def go_to_pose(self, pose: PoseStamped) -> bool:
+        """Navigate to the requested pose
+
+        Parameters
+        ----------
+        pose : PoseStamped
+            Location details as PoseStamped message
+
+        Returns
+        -------
+        bool
+            Status of the navigation
+        """
         self.node.get_logger().info(
             f"[Navigator] Navigating to pose: {pose.pose.position}")
         self.navigator.goToPose(pose)
@@ -24,7 +57,7 @@ class Navigator:
 
         result = self.navigator.getResult()
 
-        if result.value == 1:  # SUCCEEDED
+        if result.value == 1:
             self.node.get_logger().info("[Navigator] Goal succeeded!")
             return True
         else:

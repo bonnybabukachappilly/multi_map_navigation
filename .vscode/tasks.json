@@ -128,21 +128,10 @@
             "problemMatcher": []
         },
         {
-            "label": "anscer_robotics: turtlebot3_navigation2 map1",
+            "label": "anscer_robotics: turtlebot3_navigation2",
             "type": "shell",
             "linux": {
-                "command": "source ./install/setup.bash && ros2 launch anscer_robotics multi_map_nav.launch.py map_name:=map1"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}/${config:ros_workspace}/"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "anscer_robotics: turtlebot3_navigation2 map2",
-            "type": "shell",
-            "linux": {
-                "command": "source ./install/setup.bash && ros2 launch anscer_robotics multi_map_nav.launch.py map_name:=map2"
+                "command": "source ./install/setup.bash && ros2 launch anscer_robotics multi_map_nav.launch.py"
             },
             "options": {
                 "cwd": "${workspaceFolder}/${config:ros_workspace}/"

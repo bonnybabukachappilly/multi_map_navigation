@@ -2,8 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer
 
-from anscer_pkgs.action import NavigateWormhole
-
+from anscer_pkgs.action import NavigateWormhole  # type: ignore
 
 from anscer_robotics.navigator import Navigator
 from anscer_robotics.map_switcher import MapSwitcher
@@ -13,14 +12,28 @@ from anscer_robotics.pose_estimator import PoseEstimator
 
 
 class WormholeNavigator(Node):
+    """Main entry point for the navigation process.
+
+    Methods
+    ----------
+    set_initial_pos(self) -> None:
+        Used to move robot to starting position.
+
+    execute_callback(self, goal_handle) -> NavigateWormhole.Result:
+        Action server call back
+
+    teleport_robot(self, first_location: str, second_location: str) -> None:
+        Used to teleport robot in gazebo and change the map
+    """
+
     def __init__(self) -> None:
         super().__init__('wormhole_navigator')
 
         self.navigator = Navigator(self)
-        self.map_switcher = MapSwitcher(self)
         self.wormhole_manager = WormholeManager(self)
         self.teleport = TeleportBot(self)
         self.pose_estimator = PoseEstimator(self)
+        self.map_switcher = MapSwitcher(self, self.wormhole_manager)
 
         self._action_server = ActionServer(
             self,
@@ -32,15 +45,29 @@ class WormholeNavigator(Node):
         self.get_logger().info("[WormholeNavigator] Ready to accept goals")
 
     def set_initial_pos(self) -> None:
+        """Used to move robot to starting position.
+        Done for this particular case since existing gazebo sim is splitted in to two parts """
         self.teleport_robot('map1', 'map2')
 
     def execute_callback(self, goal_handle) -> NavigateWormhole.Result:
+        """Action server call back
+
+        Parameters
+        ----------
+        goal_handle : NavigateWormhole
+            goal request
+
+        Returns
+        -------
+        NavigateWormhole.Result
+            result of the requested action
+        """
         self.get_logger().info("[Action] Received navigation request")
 
         target_pose = goal_handle.request.target_pose
         target_map = goal_handle.request.target_map.strip()
 
-        current_map = self.map_switcher.get_current_map()
+        current_map = self.map_switcher.current_map
 
         feedback_msg = NavigateWormhole.Feedback()
         feedback_msg.percent_complete = 0.0
@@ -82,19 +109,39 @@ class WormholeNavigator(Node):
             goal_handle.abort()
             return NavigateWormhole.Result(success=False, message="Failed to reach final goal")
 
-    def teleport_robot(self, arg0, arg1) -> None:
-        teleport_pose = self.wormhole_manager.get_wormhole_pose(arg0, arg1)
+    def teleport_robot(self, first_location: str, second_location: str) -> None:
+        """Used to teleport robot in gazebo and change the map
+
+        Parameters
+        ----------
+        first_location : str
+            first location name
+        second_location : str
+            second location name
+        """
+        teleport_pose = self.wormhole_manager.get_wormhole_pose(
+            first_location, second_location)
         self.teleport.teleport(
-            teleport_pose.pose.position.x, teleport_pose.pose.position.y
+            teleport_pose.pose.position.x, teleport_pose.pose.position.y  # type: ignore
         )
         self.pose_estimator.set_pose(
-            teleport_pose.pose.position.x, teleport_pose.pose.position.y
+            teleport_pose.pose.position.x, teleport_pose.pose.position.y  # type: ignore
         )
 
 
 def main(args=None) -> None:
+    """Entry point to the package
+
+    Parameters
+    ----------
+    args : Any, optional
+        Initialization argument, by default None
+    """
     rclpy.init(args=args)
-    node = WormholeNavigator()
-    node.set_initial_pos()
-    rclpy.spin(node)
-    print("DONE")
+    navigator = WormholeNavigator()
+    navigator.set_initial_pos()
+    try:
+        rclpy.spin(navigator)
+    finally:
+        rclpy.shutdown()
+        navigator.destroy_node()
